@@ -35,6 +35,7 @@ def extract_company_from_html(url: str) -> str:
 if __name__ == "__main__":
     test_urls = [
         "https://www.lockheedmartin.com",
+        "https://www.northropgrumman.com/who-we-are/the-facts/solid-rocket-motors-propulsion/boosting-production?utm_source=googlesem&utm_medium=search&utm_campaign=space-crm&utm_audience=customer&utm_content=keywords&utm_format=cpc&code=OTH-13321&source=OTH-13321&gad_source=1&gad_campaignid=22847333944&gbraid=0AAAAADmzLUhAXOuBxE7HvZD0kiH2QOoi9&gclid=Cj0KCQjwwsrFBhD6ARIsAPnUFD3mXqZwbgbvU9X7K5u0rNf58daxtsXs4qr6tkFth31Ll7oZ6dSuD5IaAjkwEALw_wcB",
         "https://www.boeing.com",
         "https://www.northropgrumman.com",
         "https://nominal.io/",
