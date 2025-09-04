@@ -2,7 +2,7 @@ import json
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional
-from web_scrape import extract_company_from_html
+from web_scrape import extract_company_from_html, identify_url_type
 from grading import calculate_grade
 import os
 
@@ -22,7 +22,9 @@ class GradeResponse(BaseModel):
 @app.get("/get_grade", response_model=GradeResponse)
 def get_grade(url: str = Query(..., description="URL of the company website")):
     try:
-        company_name = extract_company_from_html(url)
+        
+        url_type = identify_url_type(url)
+        company_name = extract_company_from_html(url, url_type)
         if not company_name:
             return GradeResponse(company=None, total_awards=None, grade=None, error="Company name could not be extracted.")
         # Try to match company name in data (case-insensitive, exact match)

@@ -77,7 +77,8 @@ def extract_company_from_html(url: str, url_type) -> str:
     response.raise_for_status()
     soup = BeautifulSoup(response.text, "lxml")
 
-
+    if url_type == "workday":
+        return extract_company_from_known_url(url, url_type)
     # icims
     if url_type == "icims":
         print("here")
@@ -102,14 +103,14 @@ def extract_company_from_html(url: str, url_type) -> str:
     meta = soup.find("meta", property="og:site_name")
 
     # checks meta_content for name
-    if meta and meta.get("content"):
-        return meta["content"].strip()
+    if meta and hasattr(meta, "get") and meta.get("content"):
+        return meta.get("content").strip()
 
     # checks html title
     if soup.title and soup.title.string:
         return soup.title.string.strip()
 
-    return None
+    return ""
 
 
 if __name__ == "__main__":
