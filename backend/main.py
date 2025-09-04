@@ -16,7 +16,7 @@ app = FastAPI()
 class GradeResponse(BaseModel):
     company: Optional[str]
     total_awards: Optional[int]
-    grade: Optional[str]
+    grade: Optional[int]
     error: Optional[str] = None
 
 @app.get("/get_grade", response_model=GradeResponse)
