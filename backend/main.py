@@ -13,13 +13,47 @@ with open(data_path, 'r') as f:
 
 app = FastAPI()
 
+class GradeRequest(BaseModel):
+    url: str
+    companyName: Optional[str] = None
+
 class GradeResponse(BaseModel):
     company: Optional[str]
     total_awards: Optional[int]
     grade: Optional[int]
     error: Optional[str] = None
 
-@app.get("/get_grade", response_model=GradeResponse)
+@app.post("/grades", response_model=GradeResponse)
+
+def compute_grade(req: GradeRequest):
+    """
+    compute the grade based on the either the company name from the frontend, or further logic from html extraction
+    """
+
+    try:
+        if req.companyName:
+            match = next((k for k in company_data if k.lower() == req.companyName.lower()), None)
+            if match:
+                total_awards = company_data[match]["total_awards"]
+                grade = calculate_grade(total_awards)
+                return GradeResponse(company=match, total_awards=total_awards, grade=grade)
+        
+        url_type = identify_url_type(req.url)
+        extracted = extract_company_from_html(req.url, url_type)
+        if extracted:
+            match = next((k for k in company_data if k.lower() == extracted.lower()), None)
+            if match:
+                total_awards = company_data[match]["total_awards"]
+                grade = calculate_grade(total_awards)
+                return GradeResponse(company=match, total_awards=total_awards, grade=grade)
+            else:
+                return GradeResponse(company=extracted, total_awards=None, grade=None, error="Company not found in data.")
+
+        return GradeResponse(company=None, total_awards=None, grade=None, error="Company name could not be extracted.")
+    except Exception as e:
+        return GradeResponse(company=None, total_awards=None, grade=None, error=str(e))
+    
+"""
 def get_grade(url: str = Query(..., description="URL of the company website")):
     try:
         
@@ -36,3 +70,4 @@ def get_grade(url: str = Query(..., description="URL of the company website")):
         return GradeResponse(company=match, total_awards=total_awards, grade=grade)
     except Exception as e:
         return GradeResponse(company=None, total_awards=None, grade=None, error=str(e))
+"""

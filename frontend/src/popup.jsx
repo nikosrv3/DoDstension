@@ -3,6 +3,17 @@ import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 
+function normalizeUrl(u) {
+  try {
+    const obj = new URL(u)
+    obj.search = ""   // strip query params
+    obj.hash = ""     // strip fragment
+    return obj.toString()
+  } catch {
+    return u
+  }
+}
+
 function Popup() {
   const [tabUrl, setTabUrl] = useState('')
   const [data, setData] = useState(null)
@@ -23,12 +34,23 @@ function Popup() {
       try {
         const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
         const url = activeTab?.url || ''
+        console.log("Popup init: activeTab.url =", url)
+
         setTabUrl(url)
 
         if (url) {
-          const key = `resp:${url}`
+          const normUrl = normalizeUrl(url)
+          const key = `resp:${normUrl}`
           const cached = await chrome.storage.local.get([key])
-          if (cached[key]) setData(cached[key])
+          console.log("Popup init: checking storage with key =", key, "cached =", cached)
+          console.log("Popup init: cached object =", JSON.stringify(cached, null, 2))
+          
+          if (cached[key]) {
+            console.log("Popup init: setting data from cache =", cached[key])
+            console.log("Popup init: cached object =", JSON.stringify(cached, null, 2))
+
+            setData(cached[key])
+          }
         }
       } catch (e) {
         setError(String(e))
@@ -40,11 +62,15 @@ function Popup() {
 
     // listen for updates from background
     const onMsg = (msg) => {
+      console.log("Popup got message:", msg, "current tabUrl =", tabUrl)      
       if (msg?.type === 'PAGE_DATA_CACHED' && msg.url === tabUrl) {
+        console.log("Popup got message:", msg, "current tabUrl =", tabUrl)      
+
         setData(msg.data)
         setError('')
       }
       if (msg?.type === 'PAGE_DATA_ERROR' && msg.url === tabUrl) {
+        console.log("Popup got message:", msg, "current tabUrl =", tabUrl)      
         setError(msg.error || 'Unknown error')
       }
     }

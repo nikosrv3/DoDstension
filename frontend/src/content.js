@@ -1,4 +1,6 @@
 // src/content.js
+
+
 // recursive json search for company name
 function findHiringOrg(obj) {
   if (!obj || typeof obj !== "object") return null;
@@ -46,12 +48,7 @@ function findHiringOrg(obj) {
     chrome.runtime.sendMessage({
       type: "PAGE_COMPANY_JSONLD",
       url: window.location.href,
-      companyName
-    });
-    chrome.runtime.sendMessage({
-      type: "PAGE_COMPANY_JSONLD",
-      url: window.location.href,
-      companyName
+      companyName: companyName || null
     });
   }
 })();
